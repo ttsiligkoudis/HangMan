@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>HangMan</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="./styles/main.css">
+    </head>
+</head>
+<body>
+    <div class="wrapper">
+        <h1 id="title">Hangman</h1>
+     </div>
+
+    <div class="wrapper">
+        <div id="extraButtons">
+                <div class="preference">
+                    <label id="language" for="English">Language</label>
+                    <button id="English" class="activated">English</button>
+                    <button id="Greek">Greek</button>
+                </div>
+                <div class="preference">
+                    <label id="manualWordLabel" for="manualWord">Check this to fill your own word</label>
+                    <input type="checkbox" name="manualWord" id="manualWord">
+                </div>
+                <div class="preference">
+                    <label id="wordStrLabel" for="wordStr">Word will start from</label>
+                    <input type="text" name="wordStr" id="wordStr">
+                </div>
+        </div>
+        <button id="startGame">Start Game</button>
+        <div id="lives"></div>
+
+        <div id="hangMan">
+            <img id="hangManLives7" src="./assets/hangMan/hangManLives7.svg" alt="7 Lives" hidden>
+            <img id="hangManLives6" src="./assets/hangMan/hangManLives6.svg" alt="6 Lives" hidden>
+            <img id="hangManLives5" src="./assets/hangMan/hangManLives5.svg" alt="5 Lives" hidden>
+            <img id="hangManLives4" src="./assets/hangMan/hangManLives4.svg" alt="4 Lives" hidden>
+            <img id="hangManLives3" src="./assets/hangMan/hangManLives3.svg" alt="3 Lives" hidden>
+            <img id="hangManLives2" src="./assets/hangMan/hangManLives2.svg" alt="2 Lives" hidden>
+            <img id="hangManLives1" src="./assets/hangMan/hangManLives1.svg" alt="1 Lives" hidden>
+            <img id="hangManLives0" src="./assets/hangMan/hangManLives0.svg" alt="0 Lives" hidden>
+        </div>
+
+        <div id="buttons"></div>
+
+        <div id="word"></div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
