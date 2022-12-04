@@ -2,29 +2,79 @@ var lives;
 var oldLives;
 var word;
 var guesses = [];
-var counter ;  
-var locale = "en-GB";
+var counter ;
 
-var englishAlphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+class Language {
+    constructor(lang) {
+        var __construct = function (){
+            if (eval('typeof ' + lang) == 'undefined'){
+                lang = 'en';
+            }
+            return;
+        };
+        this.getStr = function (str){
+            var retStr = eval('eval(lang).' + str);
+            if (typeof retStr != 'undefined'){
+                return retStr;
+            } else {
+                return str;
+            }
+        };
+    }
+};
 
-var greekAlphabet = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ',
-'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ',
-'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'];
+var en = {
+    Title:'Hangman',
+    Alphabet: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+    QueryURL: './assets/dictionaries/EnglishWords.txt',
+    GetLives: function(lives){
+        return 'You have ' + lives + ' lives left.';
+    },
+    Victory: 'Congratulations, You Won!',
+    Defeat: 'Game Over.',
+    ManualWord: 'Enter your word',
+    StartsWith: 'Word will start from',
+    CheckBox: 'Check this to fill your own word',
+    Start: 'Start Game',
+    English: 'English',
+    Greek: 'Greek',
+    Language: 'Language',
+    NoWord: 'No word was given.',
+    NoMatch: 'Couldn\'t find a word.'
+};
 
-var alphabet = [];
+var gr = {
+    Title:'Κρεμάλα',
+    Alphabet: ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ',
+    'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ',
+    'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'],
+    QueryURL: './assets/dictionaries/GreekWords.txt',
+    GetLives: function(lives){
+        return 'Απομένουν ' + lives + ' ζωές.';
+    },
+    Victory: 'Συγχαρητηρία, νίκησες!',
+    Defeat: 'Τέλος Παιχνιδιού.',
+    ManualWord: 'Πληκτρολογίστε την λέξη σας',
+    StartsWith: 'Η λέξη θα ξεκινάει από',
+    CheckBox: 'Κάνε κλικ εδώ για να βάλεις την δική σου λέξη',
+    Start: 'Έναρξη παιχνιδιού',
+    English: 'Αγγλικά',
+    Greek: 'Ελληνικά',
+    Language: 'Γλώσσα',
+    NoWord: 'Δεν δόθηκε λέξη.',
+    NoMatch: 'Δεν βρέθηκε λέξη.'
+};
+
+var language = 'en';
+var translator = new Language(language);
 
 function Buttons() {
-    $("#buttons").empty();
-    var myButtons = $("#buttons");
+    $('#buttons').empty();
+    var myButtons = $('#buttons');
     var ul = $('<ul/>').attr('id', 'alphabet');
-    if(locale == "en-GB"){
-        alphabet = englishAlphabet;
-    }
-    else{
-        alphabet = greekAlphabet;
-    }
+    var alphabet = language == 'en' ? en.Alphabet : gr.Alphabet;
     $.each(alphabet, function(index, value){
         var li = $('<li/>').attr('id', 'letter').html(value);
         check(li);
@@ -34,36 +84,28 @@ function Buttons() {
 };
 
 function changeImage(){
-    $("#hangManLives"+lives).show();
-    if(lives != oldLives){
-        $("#hangManLives"+oldLives).hide();
-    }
+    $('#hangManLives'+lives).show();
+    lives != oldLives ? $('#hangManLives'+oldLives).hide() : '';
 };
     
 function GetRandomWord(){
-    var manualWord = $("#manualWord").is(":checked");
-    var wordStr = $("#wordStr").val().trim().toUpperCase();
+    var manualWord = $('#manualWord').is(':checked');
+    var wordStr = $('#wordStr').val().trim().toUpperCase();
     if(manualWord){
        word = wordStr;
     }
     else{
         var wordList;
-        var queryURL;
-        if(locale == "en-GB"){
-            queryURL = "./assets/dictionaries/EnglishWords.txt"
-        }
-        else{
-            queryURL = "./assets/dictionaries/GreekWords.txt"
-        }
+        var queryURL = translator.getStr('QueryURL');
         $.ajax({
             url: queryURL,
             async: false,
             success: function (data) {
-                wordList = data.split(" ");
+                wordList = data.split(' ');
             }
         });
-        if(wordStr != null && wordStr != ""){
-            wordList = wordList.filter(name => name.startsWith(wordStr))
+        if(wordStr != null && wordStr != ''){
+            wordList = wordList.filter(name => name.startsWith(wordStr));
         }
         word = wordList[Math.floor(Math.random() * wordList.length)];
     }
@@ -74,14 +116,10 @@ function WordCreate() {
     wordHolder = $('#word');
     wordHolder.empty();
     guesses = [];
-    var ul = $("<ul/>").attr("id", "my-word");
+    var ul = $('<ul/>').attr('id', 'my-word');
     $.each(word.split(''), function(index, value){
-        var li = $("<li/>").addClass("guess");
-        if(index == 0){
-            li.html(word[index]);
-        }else{
-            li.html("_")
-        }
+        var li = $('<li/>').addClass('guess');
+        li.html('_');
         guesses.push(li);
         ul.append(li);
     });
@@ -89,23 +127,18 @@ function WordCreate() {
 };
 
 function InitGame(){
-    counter = 1;
-    oldLives = lives
+    counter = 0;
+    oldLives = lives;
     lives = 7;
-    if(locale == "en-GB"){
-        $("#lives").text("You have " + lives + " lives left.");
-    }
-    else{
-        $("#lives").text("Απομένουν " + lives + " ζωές.");
-    }
-    changeImage()
+    language == 'en' ? $('#lives').text(en.GetLives(lives)) : $('#lives').text(gr.GetLives(lives));
+    changeImage();
 };
 
 check = function (li) {
     li.click(function(){
         if(lives > 0 && counter < guesses.length){
             var guess = (this.innerHTML);
-            $(this).addClass("disabled");
+            $(this).addClass('disabled');
             $(this).off();
             var failedGuess = (word.indexOf(guess) == -1);
             if(!failedGuess){
@@ -115,139 +148,74 @@ check = function (li) {
                         counter ++;
                     } 
                 }
-                debugger;
-                if(counter == word.length){
-                    if(locale == "en-GB"){
-                        $("#lives").text("Congratulations, You Won!");
-                    }
-                    else{
-                        $("#lives").text("Συγχαρητία, νίκησες!");
-                    }
-                }
+                counter == word.length ? $('#lives').text(translator.getStr('Victory')) : '';
             }
             else{
                 oldLives = lives;
                 lives--;
-                if(locale == "en-GB"){
-                    $("#lives").text("You have " + lives + " lives left.");
-                }
-                else{
-                    $("#lives").text("Απομένουν " + lives + " ζωές.");
-                }
-                changeImage()
+                language == 'en' ? $('#lives').text(en.GetLives(lives)) : $('#lives').text(gr.GetLives(lives));
+                changeImage();
                 if(lives == 0){
-                    if(locale == "en-GB"){
-                        $("#lives").text("Game Over.");
-                    }
-                    else{
-                        $("#lives").text("Τέλος Παιχνιδιού.");
-                    }
+                    $('#lives').text(translator.getStr('Defeat'));
+                    for (var i = 0; i < word.length; i++) {
+                            guesses[i].html(word[i]);
+                    } 
                 }
-                    
             }
         }
     });
 };
 
-$("#manualWord").click(function(){
-    if($("#manualWord").is(":checked")){
-        if(locale == "en-GB"){
-            $("#wordStrLabel").text("Enter your word");
-        }
-        else{
-            $("#wordStrLabel").text("Πληκτρολογίστε την λέξη σας");
-        }
-        $("#wordStr").val(null);
-        $("#wordStr").attr("type", "password");
+$('#manualWord').click(function(){
+    if($('#manualWord').is(':checked')){
+        $('#wordStrLabel').text(translator.getStr('ManualWord'));
+        $('#wordStr').val(null);
+        $('#wordStr').attr('type', 'password');
     }
     else{
-        if(locale == "en-GB"){
-            $("#wordStrLabel").text("Word will start from");
-        }
-        else{
-            $("#wordStrLabel").text("Η λέξη θα ξεκινάει από");
-        }
-        $("#wordStr").val(null);
-        $("#wordStr").attr("type", "text");
+        $('#wordStrLabel').text(translator.getStr('StartsWith'));
+        $('#wordStr').val(null);
+        $('#wordStr').attr('type', 'text');
     }
     
 });
 
-$("#English,#Greek").click(function(e){
-    if(e.target.id == "English"){
-        $("#English").addClass("activated");
-        $("#Greek").removeClass("activated");
-        locale = "en-GB";
+$('#English,#Greek').click(function(e){
+    if(e.target.id == 'English'){
+        $('#English').addClass('activated');
+        $('#Greek').removeClass('activated');
+        language = 'en';
+        translator = new Language(language);
     }
-    else if(e.target.id == "Greek"){
-        $("#Greek").addClass("activated");
-        $("#English").removeClass("activated");
-        locale = "el-GR";
+    else if(e.target.id == 'Greek'){
+        $('#Greek').addClass('activated');
+        $('#English').removeClass('activated');
+        language = 'gr';
+        translator = new Language(language);
     }
-    if($("#manualWord").is(":checked")){
-        if(locale == "en-GB"){
-            $("#wordStrLabel").text("Enter your word");
-        }
-        else{
-            $("#wordStrLabel").text("Πληκτρολογίστε την λέξη σας");
-        }
-    }
-    else{
-        if(locale == "en-GB"){
-            $("#wordStrLabel").text("Word will start from");
-        }
-        else{
-            $("#wordStrLabel").text("Η λέξη θα ξεκινάει από");
-        }
-    }
-    if(locale == "en-GB"){
-        $("#manualWordLabel").text("Check this to fill your own word");
-        $("#startGame").text("Start Game");
-        $("#English").text("English");
-        $("#Greek").text("Greek");
-        $("#language").text("Language");
-        $("#title").text("HangMan");
-    }
-    else{
-        $("#manualWordLabel").text("Κάνε κλικ εδώ για να βάλεις την δική σου λέξη");
-        $("#startGame").text("Έναρξη παιχνιδιού");
-        $("#English").text("Αγγλικά");
-        $("#Greek").text("Ελληνικά");
-        $("#language").text("Γλώσσα");
-        $("#title").text("Κρεμάλα");
-    }
-})
+    $('#manualWord').is(':checked') 
+        ? $('#wordStrLabel').text(translator.getStr('ManualWord')) 
+        : $('#wordStrLabel').text(translator.getStr('StartsWith'));
 
-$("#startGame").click(function(){
-    if(locale == "en-GB"){
-        $("#startGame").text("Reset Game");
-    }
-    else{
-        $("#startGame").text("Επανεκκίνηση παιχνιδιού");
-    }
+    $('#manualWordLabel').text(translator.getStr('CheckBox'));
+    $('#startGame').text(translator.getStr('Start'));
+    $('#English').text(translator.getStr('English'));
+    $('#Greek').text(translator.getStr('Greek'));
+    $('#language').text(translator.getStr('Language'));
+    $('#title').text(translator.getStr('Title'));
+});
+
+$('#startGame').click(function(){
     word = GetRandomWord();
     console.log(word);
-    if(word != null && word != ""){
+    if(word != null && word != ''){
         InitGame();
         WordCreate();
         Buttons();
     }
     else{
-        if($("#manualWord").is(":checked")){
-            if(locale == "en-GB"){
-                $("#lives").text("No word was given.");
-            }
-            else{
-                $("#lives").text("Δεν δόθηκε λέξη.");
-            }
-        }
-        else{
-            if(locale == "en-GB"){
-                $("#lives").text("Couldn't find a word.");
-            }
-            else{
-                $("#lives").text("Δεν βρέθηκε λέξη.");
-            }
-        }
+        $('#manualWord').is(':checked') 
+            ? $('#lives').text(translator.getStr('NoWord')) 
+            : $('#lives').text(translator.getStr('NoMatch'));
     }
 });

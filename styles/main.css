@@ -8,7 +8,6 @@ body {
   }
   
   .wrappper {
-    max-width: 850px;
     margin: 0 auto;
     padding: 1em;
   }
@@ -27,7 +26,7 @@ body {
   }
   
   h1 {
-    font-size: 2em;
+    font-size: 1.5em;
   }
   
   h2 {
@@ -51,7 +50,7 @@ body {
   
   #alphabet li {
     float: left;
-    margin: 0 5px 10px 0;
+    margin: 0 5px 5px 0;
     list-style: none;
     width: 35px;
     height: 30px;
@@ -71,14 +70,14 @@ body {
     color: #fff;
   }
   
-  #my-word {
+  #word {
     margin: 0;
     display: block;
     padding: 0;
     display: block;
   }
   
-  #my-word li {
+  #word li {
     position: relative;
     list-style: none;
     margin: 0;
@@ -109,7 +108,7 @@ body {
   }
   
   #lives {
-    font-size: 1.6em;
+    font-size: 1em;
     text-align: center;
     display: block;
   }
@@ -143,23 +142,12 @@ body {
 
   #startGame {
     font-size: 1em;
-    padding: 15px 10px;
-    margin: 10px;
+    padding: 10px;
+    margin: 5px;
   }
 
   .preference {
     justify-content: space-between;
-    margin: 10px;
+    margin: 5px;
+    font-size: 0.8em;
 }
-  
-  @media (max-width: 767px) {
-    #alphabet {
-      padding: 0 0 0 15px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    #alphabet {
-      padding: 0 0 0 25px;
-    }
-  }
