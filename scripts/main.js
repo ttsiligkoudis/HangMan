@@ -54,7 +54,7 @@ var gr = {
     GetLives: function(lives){
         return 'Απομένουν ' + lives + ' ζωές.';
     },
-    Victory: 'Συγχαρητηρία, νίκησες!',
+    Victory: 'Συγχαρητήρια, νίκησες!',
     Defeat: 'Τέλος Παιχνιδιού.',
     ManualWord: 'Πληκτρολογίστε την λέξη σας',
     StartsWith: 'Η λέξη θα ξεκινάει από',
