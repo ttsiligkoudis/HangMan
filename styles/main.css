@@ -10,6 +10,7 @@ body {
   .wrappper {
     margin: 0 auto;
     padding: 1em;
+    text-align: center;
   }
   .wrappper:after {
     content: "";
@@ -40,7 +41,10 @@ body {
   #alphabet {
     margin: 15px auto;
     padding: 0;
-    max-width: 900px;
+    display: inline-block;
+    zoom:1;
+        *display: inline;
+    max-width: 1100px;
   }
   #alphabet:after {
     content: "";

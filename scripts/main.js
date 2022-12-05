@@ -1,27 +1,84 @@
 var lives;
 var oldLives;
-var word;
 var guesses = [];
 var counter ;
 
-class Language {
-    constructor(lang) {
-        var __construct = function (){
-            if (eval('typeof ' + lang) == 'undefined'){
-                lang = 'en';
-            }
-            return;
-        };
-        this.getStr = function (str){
-            var retStr = eval('eval(lang).' + str);
-            if (typeof retStr != 'undefined'){
-                return retStr;
-            } else {
-                return str;
-            }
-        };
+class Word{
+    #word;
+    
+    set #wordFunction(word){
+        this.#word = word;
     }
-};
+    get #wordFunction(){
+        return this.#word;
+    }
+
+    wordLength(){
+        return this.#wordFunction.length;
+    }
+    
+    GetRandomWord(){
+        var manualWord = $('#manualWord').is(':checked');
+        var wordStr = $('#wordStr').val().trim().toUpperCase();
+        if(manualWord){
+            this.#wordFunction = wordStr
+        }
+        else{
+            var wordList;
+            var queryURL = terminology.QueryURL;
+            $.ajax({
+                url: queryURL,
+                async: false,
+                success: function (data) {
+                    wordList = data.split(' ');
+                }
+            });
+            if(wordStr != null && wordStr != ''){
+                wordList = wordList.filter(name => name.startsWith(wordStr));
+            }
+            this.#wordFunction = wordList[Math.floor(Math.random() * wordList.length)];
+        }
+    }
+    
+    WordCreate() {
+        var wordHolder = $('#word');
+        wordHolder.empty();
+        guesses = [];
+        var ul = $('<ul/>').attr('id', 'my-word');
+        $.each(this.#wordFunction.split(''), function(index, value){
+            var li = $('<li/>').addClass('guess');
+            li.html('_');
+            guesses.push(li);
+            ul.append(li);
+        });
+        wordHolder.append(ul);
+    }
+
+    isNullOrEmpty(){
+        return this.#wordFunction == null || this.#wordFunction == "";
+    }
+
+    check(guess){
+        for (var i = 0; i < this.wordLength(); i++) {
+            if (this.#wordFunction[i] == guess) {
+                guesses[i].html(guess);
+                counter ++;
+            } 
+        }
+    }
+    
+    GetIndex(guess){
+        return this.#wordFunction.indexOf(guess)
+    }
+
+    showWord(){
+        for (var i = 0; i < this.wordLength(); i++) {
+            guesses[i].html(this.#wordFunction[i]);
+        }
+    }
+}
+
+// var word = new Word();
 
 var en = {
     Title:'Hangman',
@@ -30,7 +87,7 @@ var en = {
     'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
     QueryURL: './assets/dictionaries/EnglishWords.txt',
     GetLives: function(lives){
-        return 'You have ' + lives + ' lives left.';
+        return `You have ${lives} lives left.`;
     },
     Victory: 'Congratulations, You Won!',
     Defeat: 'Game Over.',
@@ -52,7 +109,7 @@ var gr = {
     'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'],
     QueryURL: './assets/dictionaries/GreekWords.txt',
     GetLives: function(lives){
-        return 'Απομένουν ' + lives + ' ζωές.';
+        return `Απομένουν ${lives} ζωές.`;
     },
     Victory: 'Συγχαρητήρια, νίκησες!',
     Defeat: 'Τέλος Παιχνιδιού.',
@@ -68,16 +125,21 @@ var gr = {
 };
 
 var language = 'en';
-var translator = new Language(language);
+var terminology = en;
 
-function Buttons() {
+function GetTerminology(lng){
+    language = lng;
+    terminology = language == 'gr' ? gr : en;
+}
+
+function Buttons(word) {
     $('#buttons').empty();
     var myButtons = $('#buttons');
     var ul = $('<ul/>').attr('id', 'alphabet');
     var alphabet = language == 'en' ? en.Alphabet : gr.Alphabet;
     $.each(alphabet, function(index, value){
         var li = $('<li/>').attr('id', 'letter').html(value);
-        check(li);
+        check(li,word);
         ul.append(li);
     });
     myButtons.append(ul);
@@ -87,79 +149,34 @@ function changeImage(){
     $('#hangManLives'+lives).show();
     lives != oldLives ? $('#hangManLives'+oldLives).hide() : '';
 };
-    
-function GetRandomWord(){
-    var manualWord = $('#manualWord').is(':checked');
-    var wordStr = $('#wordStr').val().trim().toUpperCase();
-    if(manualWord){
-       word = wordStr;
-    }
-    else{
-        var wordList;
-        var queryURL = translator.getStr('QueryURL');
-        $.ajax({
-            url: queryURL,
-            async: false,
-            success: function (data) {
-                wordList = data.split(' ');
-            }
-        });
-        if(wordStr != null && wordStr != ''){
-            wordList = wordList.filter(name => name.startsWith(wordStr));
-        }
-        word = wordList[Math.floor(Math.random() * wordList.length)];
-    }
-    return word;
-};
-
-function WordCreate() {
-    wordHolder = $('#word');
-    wordHolder.empty();
-    guesses = [];
-    var ul = $('<ul/>').attr('id', 'my-word');
-    $.each(word.split(''), function(index, value){
-        var li = $('<li/>').addClass('guess');
-        li.html('_');
-        guesses.push(li);
-        ul.append(li);
-    });
-    wordHolder.append(ul);
-};
 
 function InitGame(){
     counter = 0;
     oldLives = lives;
     lives = 7;
-    language == 'en' ? $('#lives').text(en.GetLives(lives)) : $('#lives').text(gr.GetLives(lives));
+    $('#lives').text(terminology.GetLives(lives))
     changeImage();
 };
 
-check = function (li) {
+check = function (li,word) {
     li.click(function(){
         if(lives > 0 && counter < guesses.length){
             var guess = (this.innerHTML);
             $(this).addClass('disabled');
             $(this).off();
-            var failedGuess = (word.indexOf(guess) == -1);
+            var failedGuess = (word.GetIndex(guess) == -1);
             if(!failedGuess){
-                for (var i = 0; i < word.length; i++) {
-                    if (word[i] == guess) {
-                        guesses[i].html(guess);
-                        counter ++;
-                    } 
-                }
-                counter == word.length ? $('#lives').text(translator.getStr('Victory')) : '';
+                word.check(guess);
+                counter == word.wordLength() ? $('#lives').text(terminology.Victory) : '';
             }
             else{
                 oldLives = lives;
                 lives--;
-                language == 'en' ? $('#lives').text(en.GetLives(lives)) : $('#lives').text(gr.GetLives(lives));
+                $('#lives').text(terminology.GetLives(lives));
                 changeImage();
                 if(lives == 0){
-                    $('#lives').text(translator.getStr('Defeat'));
-                    for (var i = 0; i < word.length; i++) {
-                            guesses[i].html(word[i]);
-                    } 
+                    $('#lives').text(terminology.Defeat);
+                    word.showWord();
                 }
             }
         }
@@ -168,12 +185,12 @@ check = function (li) {
 
 $('#manualWord').click(function(){
     if($('#manualWord').is(':checked')){
-        $('#wordStrLabel').text(translator.getStr('ManualWord'));
+        $('#wordStrLabel').text(terminology.ManualWord);
         $('#wordStr').val(null);
         $('#wordStr').attr('type', 'password');
     }
     else{
-        $('#wordStrLabel').text(translator.getStr('StartsWith'));
+        $('#wordStrLabel').text(terminology.StartsWith);
         $('#wordStr').val(null);
         $('#wordStr').attr('type', 'text');
     }
@@ -184,38 +201,36 @@ $('#English,#Greek').click(function(e){
     if(e.target.id == 'English'){
         $('#English').addClass('activated');
         $('#Greek').removeClass('activated');
-        language = 'en';
-        translator = new Language(language);
+        GetTerminology('en');
     }
     else if(e.target.id == 'Greek'){
         $('#Greek').addClass('activated');
         $('#English').removeClass('activated');
-        language = 'gr';
-        translator = new Language(language);
+        GetTerminology('gr');
     }
     $('#manualWord').is(':checked') 
-        ? $('#wordStrLabel').text(translator.getStr('ManualWord')) 
-        : $('#wordStrLabel').text(translator.getStr('StartsWith'));
+        ? $('#wordStrLabel').text(terminology.ManualWord) 
+        : $('#wordStrLabel').text(terminology.StartsWith);
 
-    $('#manualWordLabel').text(translator.getStr('CheckBox'));
-    $('#startGame').text(translator.getStr('Start'));
-    $('#English').text(translator.getStr('English'));
-    $('#Greek').text(translator.getStr('Greek'));
-    $('#language').text(translator.getStr('Language'));
-    $('#title').text(translator.getStr('Title'));
+    $('#manualWordLabel').text(terminology.CheckBox);
+    $('#startGame').text(terminology.Start);
+    $('#English').text(terminology.English);
+    $('#Greek').text(terminology.Greek);
+    $('#language').text(terminology.Language);
+    $('#title').text(terminology.Title);
 });
 
 $('#startGame').click(function(){
-    word = GetRandomWord();
-    console.log(word);
-    if(word != null && word != ''){
-        InitGame();
-        WordCreate();
-        Buttons();
+    var word = new Word();
+    word.GetRandomWord();
+    if(word.isNullOrEmpty()){
+        $('#manualWord').is(':checked') 
+        ? $('#lives').text(terminology.NoWord) 
+        : $('#lives').text(terminology.NoMatch);
     }
     else{
-        $('#manualWord').is(':checked') 
-            ? $('#lives').text(translator.getStr('NoWord')) 
-            : $('#lives').text(translator.getStr('NoMatch'));
+        InitGame();
+        word.WordCreate();
+        Buttons(word);
     }
 });
