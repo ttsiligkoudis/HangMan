@@ -24,7 +24,7 @@ class Word{
             this.#wordFunction = wordStr
         }
         else{
-            var wordList;
+            var wordList = [];
             var queryURL = terminology.QueryURL;
             $.ajax({
                 url: queryURL,
