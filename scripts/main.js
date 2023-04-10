@@ -234,3 +234,5 @@ $('#startGame').click(function(){
         Buttons(word);
     }
 });
+
+$('#startGame').trigger('click');
